@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <title>Madding</title>
+</head>
+<style>
+    table, tr, th, td {
+        border: 1px solid orange;
+        border-collapse: collapse;
+        padding: 10px;
+    }
+</style>
+<body>
+    
+    <center>
+        <h1>Madding</h1>
+        <br>
+        
+        <p>Username: <input type="text" id='namauser'></p>   
+        <p> Password: <input type="password" id='password'> </p>
+           <p> <input type="button" value="Login" onclick="login()"> </p>
+           
+           <br>
+           <table>
+               <thead>
+                   <tr>
+                       <th>No</th>
+                       <th>Kegiatan</th>
+                       <th>Hari</th>
+                       <th>Poster</th>
+                       <th>Act</th>
+                </tr>
+            </thead>
+            <tbody id='hasilMap'>
+                
+            </tbody>
+        </table>
+        <h3 id='pengguna'>
+            
+        </h3>
+    </center>
+</body>
+<script>
+    
+        class Mading{
+            constructor(kegiatan,hari,poster){
+                this.kegiatan = kegiatan, 
+                this.hari = hari,
+                this.poster = poster
+            }
+        }
+        
+        var mading = [
+            new Mading('Lari','Senin',''),
+            new Mading('Estafet','Selasa',''),
+        ]
+
+        var user = [
+        {
+            username: 'fadel',
+            password: '123',
+            role: 'user'
+        },
+        {
+            username: 'admin',
+            password: 'admin',
+            role: 'admin'
+        }
+    ]
+    var loginAf = {}
+    var editId = null
+    var idDelete = null
+
+    function login(){
+        var username = document.getElementById('namauser').value;
+        var password = document.getElementById('password').value;
+        var cekloop = 0
+        for(var i = 0; i<user.length; i++){
+            if(username === user[i].username && password === user[i].password){
+                cekloop++
+                loginAf = user[i]
+                console.log(loginAf)
+                document.getElementById('namauser').value = ''
+                document.getElementById('password').value = ''
+                return showMading()
+            }
+        }
+        return document.getElementById('pengguna').innerHTML = 'Password Salah'
+       //console.log(cekloop)
+    }
+    function showMading(){
+        var output = ''
+        if(loginAf.role === 'user'){
+            for(var i = 0 ; i<mading.length; i++){
+                output += 
+                `
+                <tr>
+                    <td>${i+1}</td>      
+                    <td>${mading[i].kegiatan}</td>      
+                    <td>${mading[i].hari}</td>      
+                    <td>${mading[i].poster}</td>      
+                    <td></td>      
+                </tr>
+                `
+            }
+            document.getElementById('pengguna').innerHTML = loginAf.username
+            return document.getElementById('hasilMap').innerHTML = output + `<input type='button' value='logout' onclick="logout()" >`
+        }
+        else if(loginAf.role === 'admin'){
+            for(var i = 0 ; i<mading.length; i++){
+                if(editId === i){
+                    output += 
+                    `
+                    <tr>
+                        <td>${i+1}</td>      
+                        <td><input type='text' id='editAct' ></td>      
+                        <td><input type='text' id="editDay"></td>      
+                        <td><input type='text' id="editImg"></td>            
+                        <td>
+                            <input type='button' value='cancel' onclick="cancel()">      
+                            <input type='button' value='confirm' onclick="confirm(${i})">
+                        </td>      
+                    </tr>
+                    `
+                }else if(idDelete === i){
+                    output += 
+                    `
+                    <tr>
+                        <td>${i+1}</td>      
+                        <td>${mading[i].kegiatan}</td>      
+                        <td>${mading[i].hari}</td>      
+                        <td>${mading[i].poster}</td>      
+                        <td>
+                            <input type='button' value='No' onclick="cancel()">      
+                            <input type='button' value='Yes' onclick="confirmDelete(${i})">
+                        </td>      
+                    </tr>
+                    `
+                }else{
+                    output += 
+
+                    `
+                    <tr>
+                        <td>${i+1}</td>      
+                        <td>${mading[i].kegiatan}</td>      
+                        <td>${mading[i].hari}</td>      
+                        <td>${mading[i].poster}</td>      
+                        <td>
+                            <input type='button' value='Edit' onclick="editData(${i})">      
+                            <input type='button' value='Delete' onclick="deleteData(${i})">
+                        </td>      
+                    </tr>
+                    `
+                }
+            }
+            document.getElementById('pengguna').innerHTML = loginAf.username
+            return document.getElementById('hasilMap').innerHTML = ``+ output +`<tr>
+                <td></td>
+                    <td><input type='text' id='tambahKegiatan' ></td>
+                    <td><input type='text' id='tambahHari' ></td>
+                    <td><input type='text' id='tambahPoster' ></td>
+                    <td><input type='button' id='submitData' value='submit' onclick="submitData()"></td>
+                </tr>
+                <input type='button' value='logout' onclick="logout()" >`
+        }else{
+            return document.getElementById('hasilMap').innerHTML = null
+        }
+    }
+
+    function logout(){
+        loginAf = {};
+        document.getElementById('pengguna').innerHTML = ''
+        showMading()
+    }
+
+    function submitData(){
+        var tambahKegiatan = document.getElementById('tambahKegiatan').value
+        var tambahHari = document.getElementById('tambahHari').value
+        var tambahPoster = document.getElementById('tambahPoster').value
+        mading.push(new Mading(tambahKegiatan, tambahHari, tambahPoster))
+        showMading()
+    }
+
+    function deleteData(index){
+        idDelete = index
+        showMading()
+    }
+
+    function confirmDelete(i){
+        mading.splice(i,1)
+        idDelete = null
+        showMading()
+    }
+
+    function editData(index){
+        editId = index
+        showMading()
+    }
+
+    function cancel(){
+        editId = null
+        idDelete = null
+        showMading()
+    }
+    
+
+    function confirm(index){
+        var newActivity = document.getElementById('editAct').value;
+        var newDay = document.getElementById('editDay').value;
+        var newImg = document.getElementById('editImg').value;
+        var hasil = new Mading(newActivity, newDay, newImg)
+        mading[index] = hasil
+        editId = null
+        showMading()
+    }
+
+
+ </script>
+</html>
